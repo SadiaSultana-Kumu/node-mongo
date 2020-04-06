@@ -1,0 +1,83 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+</head>
+<body>
+    <h1>My node and mongo db site</h1>
+    <p id="userName"></p>
+    <div class="container">
+        <div class="row">
+            <input type="text" class="form-control" placeholder="Item Name" id="name">
+            <input type="text" class="form-control" placeholder="Price" id="price">
+            <input type="text" class="form-control" placeholder="Stock" id="stock">
+            <button class="btn btn-primary" id="addMenu">Add Menu</button>
+        </div>
+        <p style="display:none; color: green;" id="successMessage"><small>Product added successfully</small></p>
+        <ul id="menu-list">
+
+        </ul>
+    </div>
+    <script>
+        fetch('http://localhost:4200/menu')
+        .then(res => res.json())
+        .then(data =>{
+            displayMenu(data);
+        });
+
+        function displayMenu(data){
+           const menuContainer = document.getElementById('menu-list');
+           for(let i=0; i<data.length; i++){
+               const menu = data[i];
+               appendMenu(menu, menuContainer);
+           }
+        }
+        function appendMenu(menu, menuContainer){
+            const item = document.createElement('li');
+               item.innerText=`${menu.name}:$${menu.price}:available:${menu.stock}`;
+               menuContainer.appendChild(item);
+        }
+        //POST data to the server
+        const btnAddUser = document.getElementById('addMenu');
+        btnAddUser.addEventListener('click', () => {
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+            const menu = {name, price, stock};
+            console.log(menu);
+            //post
+            fetch('http://localhost:4200/addMenu', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                },
+                body: JSON.stringify(menu)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                 updateMenu(data);
+                //clean
+            const name = document.getElementById('name').value='';
+            const price = document.getElementById('price').value='';
+            const stock = document.getElementById('stock').value='';
+            //show success message
+            const success = document.getElementById('successMessage')
+            success.style.display = 'block';
+            setTimeout(()=>{
+                success.style.display = 'none';
+            },5000)
+        })
+    })
+        function updateMenu(menu){
+            const menuContainer = document.getElementById('menu-list');
+            appendMenu(menu, menuContainer);
+            document.getElementById('userName').innerText = menu.name;
+        }
+
+    </script>
+</body>
+</html> 
